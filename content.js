@@ -12,11 +12,14 @@ function showPane()
   div.style.right = '0px';
   div.style.top = '0px';
   div.style.width = '30%';
-  div.style.backgroundColor = 'snow';
+  div.style.backgroundColor = '#f8f9fa';
+  div.style.borderStyle = "solid";
+  div.style.borderWidth = "1px";
   div.style.position = 'fixed';
   div.style.zIndex = '1000';
   var ul = document.createElement('ul');
   ul.id = 'descrips';
+  ul.listStyleType = "none";
   document.body.appendChild(div);
   div.appendChild(ul);
   open = true;
@@ -41,9 +44,15 @@ function startQuery(quer){
     for(i = 0; i < pods.length; i++) {
       var li = document.createElement('li');
       var tex = document.createTextNode(pods[i].subpods[0].plaintext);
-//      var descrip = document.createTextNode(pod[i].childNodes[3]]);
+      if (!tex.length > 0)
+        continue;
+      li.style.fontFamily = "Arial";
+      li.style.display = "block";
+      li.style.paddingTop = "25px";
+      li.style.borderWidth = "1px";
+      li.style.borderStyle = "ridge";
+
       li.appendChild(tex);
-//      li2.appendChild(descrip);
       ul.appendChild(li);
 //      ul.appendChild(li2);
     };
