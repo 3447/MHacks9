@@ -1,6 +1,7 @@
 {
   "manifest_version": 2,
   "name": "MHacks9 Lookup",
+  "description" : "This extension looks up relevant information for a highlighted search term.",
   "version": "1.0",
   "permissions": ["contextMenus", "activeTab"],
 
