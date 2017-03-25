@@ -3,6 +3,28 @@ document.body.style.height = '100%';
 document.documentElement.style.width = '100%';
 document.body.style.width = '100%';
 
+
+var div = document.createElement('div');
+div.style.height = '100%';
+div.style.float = 'right';
+div.style.width = '30%';
+div.style.backgroundColor = 'snow';
+div.style.position = 'relative';
+div.style.zIndex = '1000';
+var ul = document.createElement('ul');
+document.body.appendChild(div);
+div.appendChild(ul);
+var a = document.createElement('a');
+div.appendChild(a);
+
+function getDictLink(quer){
+            var linkText = document.createTextNode("Dictionary reference for " + quer);
+            a.appendChild(linkText);
+            a.title = "Dictionary.com entry for " + quer;
+            a.href = "http://www.dictionary.com/browse/" + quer + "?s=t";
+            a.appendChild(a);
+}
+=======
 var open = false;
 function showPane()
 {
@@ -32,7 +54,6 @@ function showPane()
   div.appendChild(ul);
   open = true;
 }
-
 
 function startQuery(quer){
   var searchUrl = 'https://api.wolframalpha.com/v2/query' + '?appid=' + encodeURIComponent(appID) +
@@ -81,6 +102,19 @@ function parseResponse(respond){
     else if(lowercase in importantIDs){
       importantIDs[lowercase] = pods[i].subpods[0].plaintext;
     }
+
+    var pods = response["queryresult"]["pods"];
+    console.log(pods);
+    for(i = 0; i < pods.length; i++) {
+      var li = document.createElement('li');
+      var tex = document.createTextNode(pods[i].subpods[0].plaintext);
+//      var descrip = document.createTextNode(pod[i].childNodes[3]]);
+      li.appendChild(tex);
+//      li2.appendChild(descrip);
+      ul.appendChild(li);
+//      ul.appendChild(li2);
+    };
+    getDictLink(quer);
   };
   for(var key in importantTitle){
     if(importantTitle.hasOwnProperty(key) && importantTitle[key] !== null){
