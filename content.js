@@ -1,7 +1,3 @@
-document.documentElement.style.height = '100%';
-document.body.style.height = '100%';
-document.documentElement.style.width = '100%';
-document.body.style.width = '100%';
 
 function getDictLink(quer){
   var linkText = "<a href=\"http://www.dictionary.com/browse/" + quer + "?s=t\">";
@@ -12,24 +8,15 @@ function getDictLink(quer){
 var open = false;
 function showPane()
 {
-  if (document.getElementById('sidepane'))
+  if (document.getElementById('panelright'))
   {
-    var div = document.getElementById('sidepane');
+    var div = document.getElementById('panelright');
     div.style.display = 'block';
   }
   else
   {
   var div = document.createElement('div');
-  div.id = 'sidepane';
-  div.style.height = '100%';
-  div.style.right = '0px';
-  div.style.top = '0px';
-  div.style.width = '30%';
-  div.style.backgroundColor = '#f8f9fa';
-  div.style.borderStyle = "solid";
-  div.style.borderWidth = "1px";
-  div.style.position = 'fixed';
-  div.style.zIndex = '1000';
+  div.id = 'panelright';
   }
   var ul = document.createElement('ul');
   ul.id = 'descrips';
@@ -157,7 +144,7 @@ function clearQuery()
 
 function endQuery()
 {
-  var ex = document.getElementById('sidepane');
+  var ex = document.getElementById('panelright');
   ex.style.display = 'none';
   open = false;
 }
