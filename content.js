@@ -53,7 +53,7 @@ function parseResponse(respond){
       getWikipediaSummary(pods[0].subpods[0].plaintext);
     }
     else if(lowercase === "image"){
-      importantTitle[lowercase] = pods[i].subpods[0].plaintext;
+      importantTitle[lowercase] = pods[i].subpods[0].imagesource;
     }
     else if(lowercase in importantTitle){
       importantTitle[lowercase] = pods[i].subpods[0].plaintext;
@@ -64,16 +64,16 @@ function parseResponse(respond){
   };
   for(var key in importantTitle){
     if(importantTitle.hasOwnProperty(key) && importantTitle[key] !== null){
-      if(key.toLowerCase === "wikipedia summary"){
+      if(key.toLowerCase() === "wikipedia summary"){
         var li = document.createElement("li");
         li.setAttribute("id", "wikipedia-li");
         li.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p><img alt=\"loading\" src=\"images/loading.gif\" />&nbsp&nbspLoading</p>";
         ul.appendChild(li);
         continue;
       }
-      else if(key.toLowerCase === "image"){
+      else if(key.toLowerCase() === "image"){
         var li = document.createElement("li");
-        li.innerHTML = "<p class=\"key\"><b>Image</b></p><p><img alt=\"loading\" src=\"" + importantTitle[key] + "\" /></p>";
+        li.innerHTML = "<p class=\"key\"><b>Image</b></p><p><img class=\"sidebar-image\" src=\"" + importantTitle[key] + "\" /></p>";
         ul.appendChild(li);
         continue;
       }
@@ -96,13 +96,21 @@ function getWikipediaSummary(term){
   var x = new XMLHttpRequest();
   //  x.responseType = 'json';
   x.onload = function(){
-    response = JSON.parse(x.response);
-    document.getElementById("wikipedia-li").innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + response.query.pages[0].extract + "</p>"
+    var response = JSON.parse(x.response);
+    if("missing" in response.query){
+      document.getElementById("wikipedia-li").remove();
+    }
+    var pageid = Object.keys(response.query.pages)[0];
+    if(response.query.pages[pageid].extract == ""){
+      document.getElementById("wikipedia-li").remove();
+    }
+    document.getElementById("wikipedia-li").innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + response.query.pages.pageid.extract + "</p>"
   }
   x.onerror = function(err) {
     console.log(err);
   };
   x.open('GET', url, true);
+  x.setRequestHeader( 'Api-User-Agent', 'MHacks9 Research Agent/1.0; github.com/3447/MHacks9' );
   x.send();
 }
 
