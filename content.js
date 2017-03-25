@@ -19,7 +19,9 @@ function startQuery(quer){
   '&input=' + quer + '&format=plaintext&output=JSON';
   var x = new XMLHttpRequest();
   //  x.responseType = 'json';
-  x.onload = pareseResponse(x)
+  x.onload = function(){
+    parseResponse(x.response);
+  }
   x.onerror = function(err) {
     console.log(err);
   };
@@ -27,8 +29,8 @@ function startQuery(quer){
   x.send();
 }
 
-function pareseResponse(x){
-  var response = JSON.parse(x.response);
+function parseResponse(respond){
+  var response = JSON.parse(respond);
   console.log(response);
   if (!response || !response["queryresult"]["success"] || response["queryresult"]["error"] ){
     console.log('Invalid search to Wolfram');
@@ -56,8 +58,26 @@ function pareseResponse(x){
       importantIDs[lowercase] = pods[i].subpods[0].plaintext;
     }
   };
+  for(var key in importantTitle){
+    if(importantTitle.hasOwnProperty(key) && importantTitle[key] !== null){
+      var li = document.createElement("li");
+      li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + importantTitle[key];
+      ul.appendChild(li);
+    }
+  }
+  for(var key in importantIDs){
+    if(importantIDs.hasOwnProperty(key) && importantIDs[key] !== null){
+      var li = document.createElement("li");
+      li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + importantIDs[key];
+      ul.appendChild(li);
+    }
+  }
 }
 
+function toTitleCase(str)
+{
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   console.log("Message recieved");
