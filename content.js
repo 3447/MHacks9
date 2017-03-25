@@ -26,16 +26,27 @@ function startQuery(quer){
       console.log('Invalid search to Wolfram');
       return;
     }
+    var importantTitle = {"definition":null, "definitions":null, "synonym":null, "synonyms":null, "antonym":null, "antonyms":null,
+                          "pronounciation":null, "image":null, "basic movie information":null, "cast":null, "wikipedia summary":null,
+                          "basic series information":null, "latest trade":null, "chemical names and formulas":null,
+                          "administrative regions": null, "current weather":null, "unit conversions":null, "basic information":null,
+                          "notable facts":null, "location and owner":null, "basic properties":null};
+    var importantIDs = {"observancedate (country)":null, "notableeventfordate":null};
+
     var pods = response["queryresult"]["pods"];
     console.log(pods);
+
     for(i = 0; i < pods.length; i++) {
-      var li = document.createElement('li');
-      var tex = document.createTextNode(pods[i].subpods[0].plaintext);
-//      var descrip = document.createTextNode(pod[i].childNodes[3]]);
-      li.appendChild(tex);
-//      li2.appendChild(descrip);
-      ul.appendChild(li);
-//      ul.appendChild(li2);
+      lowercase = pods[i].title.toLowerCase();
+      if(lowercase === "wikipedia summary"){
+        importantTitle[lowercase] = getWikipediaSummary(quer);
+      }
+      else if(lowercase in importantTitle){
+        importantTitle[lowercase] = pods[i].subpods[0].plaintext;
+      }
+      else if(lowercase in importantIDs){
+        importantIDs[lowercase] = pods[i].subpods[0].plaintext;
+      }
     };
   };
   x.onerror = function(err) {
@@ -52,17 +63,3 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     startQuery(request.content);
     return true;
   }});
-
-/*
-var isSidebarOpen = false;
-function openInfo(lookup){
-
-return true;
-}
-
-var firstChild = document.body.childNodes[0];
-var toInsert = document.createElement("div");
-toInsert.className = "ui right vertical sidebar";
-toInsert.innerHTML = "<a class=\"item\">1</a><a class=\"item\">2</a><a class=\"item\">3</a>"
-document.body.insertBefore(toInsert, firstChild);
-*/
