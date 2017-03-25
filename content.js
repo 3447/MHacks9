@@ -10,6 +10,7 @@ function getDictLink(quer){
 }
 
 var open = false;
+var listen = false;
 function showPane()
 {
   if (document.getElementById('sidepane'))
@@ -37,6 +38,11 @@ function showPane()
   document.body.appendChild(div);
   div.appendChild(ul);
   open = true;
+  if (!listen)
+  {
+    listenclick();
+    listen = true;
+  }
 }
 
 function startQuery(quer){
@@ -188,3 +194,22 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     startQuery(request.content);
     return true;
   }});
+
+function listenclick(){
+  console.log("loaded dom");
+    var sp = document.getElementById('sidepane');
+    // onClick's logic below:
+    document.body.addEventListener('click', function(event) {
+      console.log('clicked');
+        if (sp.style.display == 'none')
+          return;
+        else {
+          if(!(event.target === sp) && !(event.target.parentNode === sp)
+            && !(event.target.parentNode.parentNode === sp))
+            {
+              clearQuery();
+              endQuery();
+            }
+        }
+    });
+}
