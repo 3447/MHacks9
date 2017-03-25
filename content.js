@@ -3,16 +3,36 @@ document.body.style.height = '100%';
 document.documentElement.style.width = '100%';
 document.body.style.width = '100%';
 
-var div = document.createElement('div');
-div.style.height = '100%';
-div.style.float = 'right';
-div.style.width = '30%';
-div.style.backgroundColor = 'snow';
-div.style.position = 'relative';
-div.style.zIndex = '1000';
-var ul = document.createElement('ul');
-document.body.appendChild(div);
-div.appendChild(ul);
+var open = false;
+function showPane()
+{
+  if (document.getElementById('sidepane'))
+  {
+    var div = document.getElementById('sidepane');
+    div.style.display = 'block';
+  }
+  else
+  {
+  var div = document.createElement('div');
+  div.id = 'sidepane';
+  div.style.height = '100%';
+  div.style.right = '0px';
+  div.style.top = '0px';
+  div.style.width = '30%';
+  div.style.backgroundColor = '#f8f9fa';
+  div.style.borderStyle = "solid";
+  div.style.borderWidth = "1px";
+  div.style.position = 'fixed';
+  div.style.zIndex = '1000';
+  }
+  var ul = document.createElement('ul');
+  ul.id = 'descrips';
+  ul.listStyleType = "none";
+  document.body.appendChild(div);
+  div.appendChild(ul);
+  open = true;
+}
+
 
 function startQuery(quer){
   var searchUrl = 'https://api.wolframalpha.com/v2/query' + '?appid=' + encodeURIComponent(appID) +
@@ -114,6 +134,21 @@ function getWikipediaSummary(term){
   x.send();
 }
 
+function clearQuery()
+{
+  var clear = document.getElementById('descrips');
+  while(clear.firstChild){
+    clear.removeChild(clear.firstChild);
+  }
+}
+
+function endQuery()
+{
+  var ex = document.getElementById('sidepane');
+  ex.style.display = 'none';
+  open = false;
+}
+
 function toTitleCase(str)
 {
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
@@ -121,8 +156,22 @@ function toTitleCase(str)
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   console.log("Message recieved");
-  if(request.message === "open_sidebar"){
+  console.log(open);
+  if(request.message === "open_sidebar" && open == false){
     console.log("Selection event. Looking up: " + request.content);
+    showPane();
+    startQuery(request.content);
+    return true;
+  }
+  else if(request.message === "close_sidebar" && open == true){
+    console.log("Closing tab");
+    clearQuery();
+    endQuery();
+    return true;
+  }
+  else if(request.message === "open_sidebar" && open == true){
+    console.log("Selection. Clearing then looking up: " + request.content);
+    clearQuery();
     startQuery(request.content);
     return true;
   }});
