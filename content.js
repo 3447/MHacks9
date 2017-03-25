@@ -3,28 +3,12 @@ document.body.style.height = '100%';
 document.documentElement.style.width = '100%';
 document.body.style.width = '100%';
 
-
-var div = document.createElement('div');
-div.style.height = '100%';
-div.style.float = 'right';
-div.style.width = '30%';
-div.style.backgroundColor = 'snow';
-div.style.position = 'relative';
-div.style.zIndex = '1000';
-var ul = document.createElement('ul');
-document.body.appendChild(div);
-div.appendChild(ul);
-var a = document.createElement('a');
-div.appendChild(a);
-
 function getDictLink(quer){
-            var linkText = document.createTextNode("Dictionary reference for " + quer);
-            a.appendChild(linkText);
-            a.title = "Dictionary.com entry for " + quer;
-            a.href = "http://www.dictionary.com/browse/" + quer + "?s=t";
-            a.appendChild(a);
+  var linkText = "<a href=\"http://www.dictionary.com/browse/" + quer + "?s=t\">";
+  linkText += "Dictionary.com entry for " + quer + "</a";
+  return linkText;
 }
-=======
+
 var open = false;
 function showPane()
 {
@@ -61,7 +45,7 @@ function startQuery(quer){
   var x = new XMLHttpRequest();
   //  x.responseType = 'json';
   x.onload = function(){
-    parseResponse(x.response);
+    parseResponse(x.response, quer);
   }
   x.onerror = function(err) {
     console.log(err);
@@ -70,7 +54,7 @@ function startQuery(quer){
   x.send();
 }
 
-function parseResponse(respond){
+function parseResponse(respond, quer){
   var response = JSON.parse(respond);
   console.log(response);
   if (!response || !response["queryresult"]["success"] || response["queryresult"]["error"] ){
@@ -102,36 +86,29 @@ function parseResponse(respond){
     else if(lowercase in importantIDs){
       importantIDs[lowercase] = pods[i].subpods[0].plaintext;
     }
-
-    var pods = response["queryresult"]["pods"];
-    console.log(pods);
-    for(i = 0; i < pods.length; i++) {
-      var li = document.createElement('li');
-      var tex = document.createTextNode(pods[i].subpods[0].plaintext);
-//      var descrip = document.createTextNode(pod[i].childNodes[3]]);
-      li.appendChild(tex);
-//      li2.appendChild(descrip);
-      ul.appendChild(li);
-//      ul.appendChild(li2);
-    };
-    getDictLink(quer);
   };
+
+  var ul = document.getElementById("descrips");
+
   for(var key in importantTitle){
+    var li = document.createElement("li");
     if(importantTitle.hasOwnProperty(key) && importantTitle[key] !== null){
       if(key.toLowerCase() === "wikipedia summary"){
-        var li = document.createElement("li");
         li.setAttribute("id", "wikipedia-li");
         li.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p><img alt=\"loading\" src=\"images/loading.gif\" />&nbsp&nbspLoading</p>";
         ul.appendChild(li);
         continue;
       }
       else if(key.toLowerCase() === "image"){
-        var li = document.createElement("li");
         li.innerHTML = "<p class=\"key\"><b>Image</b></p><p><img class=\"sidebar-image\" src=\"" + importantTitle[key] + "\" /></p>";
         ul.appendChild(li);
         continue;
       }
-      var li = document.createElement("li");
+      else if(key.toLowerCase() == "definition" || key.toLowerCase() == "definitions"){
+        li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + importantTitle[key] + "</p><p>" + getDictLink(quer) + "</p>";
+        ul.appendChild(li);
+        continue;
+      }
       li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + importantTitle[key];
       ul.appendChild(li);
     }
@@ -153,12 +130,14 @@ function getWikipediaSummary(term){
     var response = JSON.parse(x.response);
     if("missing" in response.query){
       document.getElementById("wikipedia-li").remove();
+      return;
     }
     var pageid = Object.keys(response.query.pages)[0];
     if(response.query.pages[pageid].extract == ""){
       document.getElementById("wikipedia-li").remove();
+      return;
     }
-    document.getElementById("wikipedia-li").innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + response.query.pages.pageid.extract + "</p>"
+    document.getElementById("wikipedia-li").innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + response.query.pages[pageid].extract + "</p>"
   }
   x.onerror = function(err) {
     console.log(err);
