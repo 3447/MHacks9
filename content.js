@@ -16,24 +16,21 @@ div.appendChild(ul);
 
 function startQuery(quer){
   var searchUrl = 'https://api.wolframalpha.com/v2/query' + '?appid=' + encodeURIComponent(appID) +
-  '&input=' + quer + '&format=plaintext&ouput=JSON';
+  '&input=' + quer + '&format=plaintext&output=JSON';
   var x = new XMLHttpRequest();
 //  x.responseType = 'json';
   x.onload = function() {
-    parser = new DOMParser();
-    var response = parser.parseFromString(x.response, "text/xml");
+    var response = JSON.parse(x.response);
     console.log(response);
-    if (!response || !response.getElementsByTagName("queryresult")[0].getAttribute("success")
-    || !response.getElementsByTagName("queryresult")[0].getAttribute("error") ){
-      errorCallback('Invalid search to Wolfram');
+    if (!response || !response["queryresult"]["success"] || response["queryresult"]["error"] ){
+      console.log('Invalid search to Wolfram');
       return;
     }
-    var pods = response.getElementsByTagName("pod");
+    var pods = response["queryresult"]["pods"];
     console.log(pods);
-    for(i = 0; i < pods.getElementsByTagName("length"); i++) {
+    for(i = 0; i < pods.length; i++) {
       var li = document.createElement('li');
-      var li2 = document.createElement('li2');
-      var tex = document.createTextNode(pods[i].childNodes[1].childNodes[1].innerHTML);
+      var tex = document.createTextNode(pods[i].subpods[0].plaintext);
 //      var descrip = document.createTextNode(pod[i].childNodes[3]]);
       li.appendChild(tex);
 //      li2.appendChild(descrip);
