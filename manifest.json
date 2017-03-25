@@ -12,7 +12,8 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js", "appid.js"]
+      "js": ["content.js", "appid.js"],
+      "css" : ["styler.css"]
     }
   ],
 
