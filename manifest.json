@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "MHacks9 Lookup",
   "version": "1.0",
-  "permissions": ["contextMenus"],
+  "permissions": ["contextMenus", "activeTab"],
 
   "background": {
     "scripts": ["background.js"]
