@@ -46,10 +46,14 @@ function parseResponse(respond){
   var pods = response["queryresult"]["pods"];
   console.log(pods);
 
-  for(i = 0; i < pods.length; i++) {
+  for(i = 1; i < pods.length; i++) {
     lowercase = pods[i].title.toLowerCase();
     if(lowercase === "wikipedia summary"){
-      importantTitle[lowercase] = getWikipediaSummary(quer);
+      importantTitle[lowercase] = true;
+      getWikipediaSummary(pods[0].subpods[0].plaintext);
+    }
+    else if(lowercase === "image"){
+      importantTitle[lowercase] = pods[i].subpods[0].plaintext;
     }
     else if(lowercase in importantTitle){
       importantTitle[lowercase] = pods[i].subpods[0].plaintext;
@@ -60,6 +64,19 @@ function parseResponse(respond){
   };
   for(var key in importantTitle){
     if(importantTitle.hasOwnProperty(key) && importantTitle[key] !== null){
+      if(key.toLowerCase === "wikipedia summary"){
+        var li = document.createElement("li");
+        li.setAttribute("id", "wikipedia-li");
+        li.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p><img alt=\"loading\" src=\"images/loading.gif\" />&nbsp&nbspLoading</p>";
+        ul.appendChild(li);
+        continue;
+      }
+      else if(key.toLowerCase === "image"){
+        var li = document.createElement("li");
+        li.innerHTML = "<p class=\"key\"><b>Image</b></p><p><img alt=\"loading\" src=\"" + importantTitle[key] + "\" /></p>";
+        ul.appendChild(li);
+        continue;
+      }
       var li = document.createElement("li");
       li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + importantTitle[key];
       ul.appendChild(li);
@@ -72,6 +89,21 @@ function parseResponse(respond){
       ul.appendChild(li);
     }
   }
+}
+
+function getWikipediaSummary(term){
+  var url = "https://en.wikipedia.org/w/api.php?format=json&action=query&exsentences=3&prop=extracts&exintro=&explaintext=&titles=" + encodeURIComponent(term);
+  var x = new XMLHttpRequest();
+  //  x.responseType = 'json';
+  x.onload = function(){
+    response = JSON.parse(x.response);
+    document.getElementById("wikipedia-li").innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + response.query.pages[0].extract + "</p>"
+  }
+  x.onerror = function(err) {
+    console.log(err);
+  };
+  x.open('GET', url, true);
+  x.send();
 }
 
 function toTitleCase(str)
