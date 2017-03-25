@@ -6,6 +6,13 @@ document.body.style.width = '100%';
 var open = false;
 function showPane()
 {
+  if (document.getElementById('sidepane'))
+  {
+    var div = document.getElementById('sidepane');
+    div.style.display = 'block';
+  }
+  else
+  {
   var div = document.createElement('div');
   div.id = 'sidepane';
   div.style.height = '100%';
@@ -17,6 +24,7 @@ function showPane()
   div.style.borderWidth = "1px";
   div.style.position = 'fixed';
   div.style.zIndex = '1000';
+  }
   var ul = document.createElement('ul');
   ul.id = 'descrips';
   ul.listStyleType = "none";
@@ -75,7 +83,7 @@ function clearQuery()
 function endQuery()
 {
   var ex = document.getElementById('sidepane');
-  document.body.removeChild(ex);
+  ex.style.display = 'none';
   open = false;
 }
 
@@ -90,6 +98,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   }
   else if(request.message === "close_sidebar" && open == true){
     console.log("Closing tab");
+    clearQuery();
     endQuery();
     return true;
   }
