@@ -3,7 +3,7 @@
   "name": "MHacks9 Lookup",
   "description" : "This extension looks up relevant information for a highlighted search term.",
   "version": "1.0",
-  "permissions": ["contextMenus", "activeTab"],
+  "permissions": ["contextMenus", "activeTab", "tabs"],
 
   "background": {
     "scripts": ["background.js"]
@@ -15,6 +15,15 @@
       "js": ["content.js", "appid.js"]
     }
   ],
+
+  "commands" : {
+    "Look_up" : {
+      "suggested_key" : {
+        "default" : "Ctrl+Space"
+      },
+      "description" : "Toggle Lookup"
+    }
+  },
 
   "icons": {
     "16": "images/icon16x16.png",
