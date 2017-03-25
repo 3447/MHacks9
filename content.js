@@ -13,6 +13,16 @@ div.style.zIndex = '1000';
 var ul = document.createElement('ul');
 document.body.appendChild(div);
 div.appendChild(ul);
+var a = document.createElement('a');
+div.appendChild(a);
+
+function getDictLink(quer){
+            var linkText = document.createTextNode("Dictionary reference for " + quer);
+            a.appendChild(linkText);
+            a.title = "Dictionary.com entry for " + quer;
+            a.href = "http://www.dictionary.com/browse/" + quer + "?s=t";
+            a.appendChild(a);
+}
 
 function startQuery(quer){
   var searchUrl = 'https://api.wolframalpha.com/v2/query' + '?appid=' + encodeURIComponent(appID) +
@@ -37,6 +47,7 @@ function startQuery(quer){
       ul.appendChild(li);
 //      ul.appendChild(li2);
     };
+    getDictLink(quer);
   };
   x.onerror = function(err) {
     console.log(err);
