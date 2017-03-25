@@ -3,16 +3,25 @@ document.body.style.height = '100%';
 document.documentElement.style.width = '100%';
 document.body.style.width = '100%';
 
-var div = document.createElement('div');
-div.style.height = '100%';
-div.style.float = 'right';
-div.style.width = '30%';
-div.style.backgroundColor = 'snow';
-div.style.position = 'relative';
-div.style.zIndex = '1000';
-var ul = document.createElement('ul');
-document.body.appendChild(div);
-div.appendChild(ul);
+var open = false;
+function showPane()
+{
+  var div = document.createElement('div');
+  div.id = 'sidepane';
+  div.style.height = '100%';
+  div.style.right = '0px';
+  div.style.top = '0px';
+  div.style.width = '30%';
+  div.style.backgroundColor = 'snow';
+  div.style.position = 'fixed';
+  div.style.zIndex = '1000';
+  var ul = document.createElement('ul');
+  ul.id = 'descrips';
+  document.body.appendChild(div);
+  div.appendChild(ul);
+  open = true;
+}
+
 
 function startQuery(quer){
   var searchUrl = 'https://api.wolframalpha.com/v2/query' + '?appid=' + encodeURIComponent(appID) +
@@ -28,6 +37,7 @@ function startQuery(quer){
     }
     var pods = response["queryresult"]["pods"];
     console.log(pods);
+    var ul = document.getElementById('descrips');
     for(i = 0; i < pods.length; i++) {
       var li = document.createElement('li');
       var tex = document.createTextNode(pods[i].subpods[0].plaintext);
@@ -45,13 +55,42 @@ function startQuery(quer){
   x.send();
 }
 
+function clearQuery()
+{
+  var clear = document.getElementById('descrips');
+  while(clear.firstChild){
+    clear.removeChild(clear.firstChild);
+  }
+}
+
+function endQuery()
+{
+  var ex = document.getElementById('sidepane');
+  document.body.removeChild(ex);
+  open = false;
+}
+
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   console.log("Message recieved");
-  if(request.message === "open_sidebar"){
+  console.log(open);
+  if(request.message === "open_sidebar" && open == false){
     console.log("Selection event. Looking up: " + request.content);
+    showPane();
     startQuery(request.content);
     return true;
-  }});
+  }
+  else if(request.message === "close_sidebar" && open == true){
+    console.log("Closing tab");
+    endQuery();
+    return true;
+  }
+  else if(request.message === "open_sidebar" && open == true){
+    console.log("Selection. Clearing then looking up: " + request.content);
+    clearQuery();
+    startQuery(request.content);
+    return true;
+  }
+});
 
 /*
 var isSidebarOpen = false;
