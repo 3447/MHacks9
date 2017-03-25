@@ -3,7 +3,9 @@ function clickHandler(info, tab){
     if(info.selectionText){
       var text = encodeURIComponent(info.selectionText);
       console.log("Looking up " + text);
-      chrome.tabs.sendMessage(tab.id, {message: "open_sidebar", content: text});
+      chrome.tabs.executeScript(null,
+        {code: "var quer = ", text, ";"},
+      function() {chrome.tabs.executeScript(null,file:"content.js")});
     }
   }
 }
