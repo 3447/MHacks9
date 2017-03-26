@@ -324,7 +324,20 @@ function toTable(input){
   }
   if(rows.length == 1 && cols[0].length == 1)
     return input;
+  cols[rows.length-1][cols[rows.length-1].length-1] =
+    cols[rows.length-1][cols[rows.length-1].length-1].substring(0, cols[rows.length-1][cols[rows.length-1].length-1].lastIndexOf("(") - 1);
   var toReturn = "<table>";
+  if(rows.length == 1){
+    toReturn +="<tr>";
+    for(var i = 0; i < cols[0].length; i++){
+      toReturn += "<td>" + cols[0][i] + "</td>";
+      if(((i+1) % 4 == 0) && ((i+1) < cols[0].length)){
+        toReturn += "</tr><tr>"
+      }
+    }
+    toReturn +="</tr></table>"
+    return toReturn;
+  }
   for(var i = 0; i < rows.length; i++){
     toReturn += "<tr>";
     for(var j = 0; j < cols[i].length; j++){
