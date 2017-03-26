@@ -217,7 +217,7 @@ function getDictionaryDef(term, nodeEle){
 }
 
 function getDictLink(quer){
-  var linkText = "<a href=\"http://www.dictionary.com/browse/" + quer + "?s=t\">";
+  var linkText = "<a target=\"_blank\" href=\"http://www.dictionary.com/browse/" + quer + "?s=t\">";
   linkText += "Dictionary.com entry for " + decodeURIComponent(quer) + "</a>";
   return linkText;
 }
@@ -236,18 +236,6 @@ function getWikipediaSummary(term, callback){
     if(response.query.pages[pageid].extract == ""){
       callback("");
       return;
-/*    try{
-      if("missing" in response.query){
-        document.getElementById("wikipedia-li").remove();
-        return;
-      }
-      var pageid = Object.keys(response.query.pages)[0];
-      if(response.query.pages[pageid].extract == ""){
-          document.getElementById("wikipedia-li").remove();
-        return;
-      }
-    } catch(err) {
-      document.getElementById("wikipedia-li").remove();*/
     }
     callback(response.query.pages[pageid].extract);
     return;
