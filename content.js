@@ -43,18 +43,17 @@ function showPane()
   {
     var div = document.createElement('div');
     div.id = 'panelright';
+    var ul = document.createElement('ul');
+    ul.id = 'descrips';
+    ul.listStyleType = "none";
+    document.body.appendChild(div);
+    div.appendChild(ul);
   }
 
   var loading = document.createElement('div');
   loading.id = "loading-spinner";
   loading.innerHTML = "<p><img alt=\"Loading, Please Wait\" src=\"" + window.url + "\" /></p><h3>Loading...Please Wait</h3>";
   div.appendChild(loading);
-
-  var ul = document.createElement('ul');
-  ul.id = 'descrips';
-  ul.listStyleType = "none";
-  document.body.appendChild(div);
-  div.appendChild(ul);
   open = true;
   if (!listen)
   {
@@ -150,15 +149,19 @@ function parseResponse(respond, quer){
         ul.appendChild(li);
       }
       else if(key.toLowerCase() === "wikipedia summary"){
+        var element = document.createElement("li");
+        element.setAttribute("id", "wikipedia-li");
+        ul.appendChild(element);
         getWikipediaSummary(pods[0].subpods[0].plaintext, function (htmlstr) {
           if (htmlstr)
           {
             console.log("wiki response");
             console.log(htmlstr);
-            var element = document.createElement("li");
+            var element = document.getElementById("wikipedia-li");
             element.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + htmlstr + "</p>";
-            element.setAttribute("id", "wikipedia-li");
-            ul.appendChild(element);
+          }
+          else{
+            document.getElementById("wikipedia-li").remove();
           }
         });
       }
@@ -263,6 +266,9 @@ function getWikipediaSummary(term, callback){
     if(response.query.pages[pageid].extract == ""){
       callback("");
       return;
+    }else if(response.query.pages[pageid].extract.indexOf("may refer to:")){
+      callback("");
+      return;
     }
     callback(response.query.pages[pageid].extract);
     return;
@@ -297,9 +303,9 @@ function toTitleCase(str)
 
 function listenclick(){
   console.log("loaded dom");
-    var sp = document.getElementById('panelright');
     // onClick's logic below:
     document.body.addEventListener('click', function(event) {
+      var sp = document.getElementById('panelright');
       console.log('clicked');
         if (sp.style.display == 'none')
           return;
@@ -312,7 +318,7 @@ function listenclick(){
             clearQuery();
             endQuery();
           }
-          while(t.parentNode != document.body){
+          while(t != document.body){
             if(t === sp)
             {
               out = false;
