@@ -133,7 +133,7 @@ function parseResponse(respond, quer){
   }
 
   if("assumptions" in response["queryresult"]){
-    var template = "Assuming \"" + response.queryresult.assumptions.word + "\" is " + response.queryresult.assumptions.values[0].desc + ". Us as ";
+    var template = "Assuming \"" + response.queryresult.assumptions.word + "\" is " + response.queryresult.assumptions.values[0].desc + ". Use as ";
     template += "<a href='#' id=\"chrome-extension-sidebar-alternates-1\" new-script=\"" + response.queryresult.assumptions.values[1].input + "\">" +
       response.queryresult.assumptions.values[1].desc + "</a> ";
     for(var k = 2; k < response.queryresult.assumptions.count; k++){
@@ -227,7 +227,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 function listenclick(){
   console.log("loaded dom");
-    var sp = document.getElementById('sidepane');
+    var sp = document.getElementById('panelright');
     // onClick's logic below:
     document.body.addEventListener('click', function(event) {
       console.log('clicked');
