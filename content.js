@@ -1,7 +1,7 @@
 
 function getDictLink(quer){
   var linkText = "<a href=\"http://www.dictionary.com/browse/" + quer + "?s=t\">";
-  linkText += "Dictionary.com entry for " + quer + "</a>";
+  linkText += "Dictionary.com entry for " + decodeURIComponent(quer) + "</a>";
   return linkText;
 }
 
@@ -41,7 +41,7 @@ function showPane()
 
 function startQuery(quer){
   var searchUrl = 'https://api.wolframalpha.com/v2/query' + '?appid=' + encodeURIComponent(appID) +
-  '&input=' + quer + '&format=plaintext&output=JSON';
+  '&input=' + quer + '&format=image,plaintext&output=JSON';
   var x = new XMLHttpRequest();
   //  x.responseType = 'json';
   x.onload = function(){
@@ -81,7 +81,7 @@ function parseResponse(respond, quer){
       getWikipediaSummary(pods[i].subpods[0].plaintext);
     }
     else if(lowercase === "image"){
-      importantTitle[lowercase] = pods[i].subpods[0].imagesource;
+      importantTitle[lowercase] = pods[i].subpods[0].img.src;
     }
     else if(lowercase in importantTitle){
       importantTitle[lowercase] = pods[i].subpods[0].plaintext;
@@ -157,14 +157,18 @@ function getWikipediaSummary(term){
   //  x.responseType = 'json';
   x.onload = function(){
     var response = JSON.parse(x.response);
-    if("missing" in response.query){
+    try{
+      if("missing" in response.query){
+        document.getElementById("wikipedia-li").remove();
+        return;
+      }
+      var pageid = Object.keys(response.query.pages)[0];
+      if(response.query.pages[pageid].extract == ""){
+        document.getElementById("wikipedia-li").remove();
+        return;
+      }
+    } catch(err) {
       document.getElementById("wikipedia-li").remove();
-      return;
-    }
-    var pageid = Object.keys(response.query.pages)[0];
-    if(response.query.pages[pageid].extract == ""){
-      document.getElementById("wikipedia-li").remove();
-      return;
     }
     document.getElementById("wikipedia-li").innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + response.query.pages[pageid].extract + "</p>"
   }
@@ -201,9 +205,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   console.log(open);
   if(request.message === "open_sidebar" && open == false){
     console.log("Selection event. Looking up: " + request.content);
+    window.url = request.url;
     showPane();
     startQuery(request.content);
-    window.url = request.url;
     return true;
   }
   else if(request.message === "close_sidebar" && open == true){
