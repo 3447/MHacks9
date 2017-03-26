@@ -86,7 +86,7 @@ function parseResponse(respond, quer){
     return;
   }
   var importantTitle = {"input interpretation":null, "definition":null, "definitions":null, "synonym":null, "synonyms":null, "antonym":null, "antonyms":null,
-                        "pronounciation":null, "image":null, "basic movie information":null, "cast":null, "wikipedia summary":null,
+                        "pronunciation":null, "image":null, "basic movie information":null, "cast":null, "wikipedia summary":null,
                         "basic series information":null, "latest trade":null, "chemical names and formulas":null,
                         "administrative regions": null, "current weather":null, "unit conversions":null, "basic information":null,
                         "notable facts":null, "location and owner":null, "basic properties":null};
