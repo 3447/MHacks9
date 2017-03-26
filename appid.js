@@ -1,2 +1,3 @@
 var appID = 'W45GWU-WW7X2UH26J';
-var dictID = '79dccedf-9444-41b0-9b6e-98fc58cae012';
+var oid = '77c1ad04';
+var okey = '13c295fd4a66ba6035000f16e9bf62e1';
