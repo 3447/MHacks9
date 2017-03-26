@@ -43,18 +43,17 @@ function showPane()
   {
     var div = document.createElement('div');
     div.id = 'panelright';
+    var ul = document.createElement('ul');
+    ul.id = 'descrips';
+    ul.listStyleType = "none";
+    document.body.appendChild(div);
+    div.appendChild(ul);
   }
 
   var loading = document.createElement('div');
   loading.id = "loading-spinner";
   loading.innerHTML = "<p><img alt=\"Loading, Please Wait\" src=\"" + window.url + "\" /></p><h3>Loading...Please Wait</h3>";
   div.appendChild(loading);
-
-  var ul = document.createElement('ul');
-  ul.id = 'descrips';
-  ul.listStyleType = "none";
-  document.body.appendChild(div);
-  div.appendChild(ul);
   open = true;
   if (!listen)
   {
@@ -82,14 +81,32 @@ function parseResponse(respond, quer){
   var response = JSON.parse(respond);
   console.log(response);
   if (!response || !response["queryresult"]["success"] || response["queryresult"]["error"] ){
-    console.log('Invalid search to Wolfram');
+    var ul = document.getElementById("descrips");
+    var li = document.createElement("li");
+    getWikipediaSummary(quer, function(htmlstr)  {
+      document.getElementById("loading-spinner").remove();
+      if (htmlstr)
+      {
+        console.log("wiki response");
+        console.log(htmlstr);
+        li.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + htmlstr + "</p>";
+        li.setAttribute("id", "wikipedia-li");
+        ul.appendChild(li);
+      }
+      else
+      {
+        console.log("Nothing found");
+        li.innerHTML = "<p>We apologize, but we could not find anything to match your search.</p>";
+        ul.appendChild(li);
+      }
+    });
     return;
   }
   var importantTitle = {"input interpretation":null, "definition":null, "definitions":null, "synonym":null, "synonyms":null, "antonym":null, "antonyms":null,
-                        "pronounciation":null, "image":null, "basic movie information":null, "cast":null, "wikipedia summary":null,
-                        "basic series information":null, "latest trade":null, "chemical names and formulas":null,
+                        "pronunciation":null, "basic movie information":null, "basic series information":null, "cast":null,
+                        "wikipedia summary":null, "latest trade":null, "chemical names and formulas":null,
                         "administrative regions": null, "current weather":null, "unit conversions":null, "basic information":null,
-                        "notable facts":null, "location and owner":null, "basic properties":null};
+                        "notable facts":null, "location and owner":null, "basic properties":null, "image":null};
   var importantIDs = {"definition:worddata":null, "observancedate (country)":null, "notableeventfordate":null};
 
   var pods = response["queryresult"]["pods"];
@@ -105,6 +122,12 @@ function parseResponse(respond, quer){
     }
     else if(lowercase === "image"){
       importantTitle[lowercase] = pods[i].subpods[0].img.src;
+    }
+    else if(lowercase === "unit conversions"){
+      importantTitle[lowercase] = "";
+      for(var j = 0; j < pods[i].numsubpods; j++){
+        importantTitle[lowercase] += pods[i].subpods[j].plaintext + "\n";
+      }
     }
     else if(lowercase in importantTitle){
       importantTitle[lowercase] = pods[i].subpods[0].plaintext;
@@ -126,32 +149,39 @@ function parseResponse(respond, quer){
         ul.appendChild(li);
       }
       else if(key.toLowerCase() === "wikipedia summary"){
+        var element = document.createElement("li");
+        element.setAttribute("id", "wikipedia-li");
+        ul.appendChild(element);
         getWikipediaSummary(pods[0].subpods[0].plaintext, function (htmlstr) {
           if (htmlstr)
           {
             console.log("wiki response");
             console.log(htmlstr);
-            li.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + htmlstr + "</p>";
-            li.setAttribute("id", "wikipedia-li");
-            ul.appendChild(li);
+            var element = document.getElementById("wikipedia-li");
+            element.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + htmlstr + "</p>";
           }
-          else {
-            li.remove();
+          else{
+            document.getElementById("wikipedia-li").remove();
           }
         });
       }
       else if(key.toLowerCase() === "image"){
-        li.innerHTML = "<p class=\"key\"><b>Image</b></p><p><img class=\"sidebar-image\" src=\"" + importantTitle[key] + "\" /></p>";
+        li.innerHTML = "<p><img class=\"sidebar-image\" src=\"" + importantTitle[key] + "\" /></p>";
         ul.appendChild(li);
         continue;
       }
       else if(key.toLowerCase() == "definition" || key.toLowerCase() == "definitions"){
-        li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + toTable(importantTitle[key]) + "</p><p>" + getDictLink(quer) + "</p>";
+        li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p>" + toTable(importantTitle[key]) + "<p>" + getDictLink(quer) + "</p>";
         ul.appendChild(li);
         continue;
       }
+      else if(key.toLowerCase() == "pronunciation"){
+        var engOnly = importantTitle[key].substring(0, importantTitle[key].lastIndexOf("(") - 1);
+        li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + engOnly + "</p>";
+        ul.appendChild(li);
+      }
       else{
-      li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + toTable(importantTitle[key]);
+      li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p>" + toTable(importantTitle[key]);
       ul.appendChild(li);
       }
     }
@@ -177,8 +207,8 @@ function parseResponse(respond, quer){
       }
       else
       {
-        console.log("going dict");
-        getDictionaryDef(quer, li, function(){});
+        console.log("Nothing found");
+        li.innerHTML = "<p>We apologize, but we could not find anything to match your search.</p>";
       }
     });
   }
@@ -217,7 +247,7 @@ function getDictionaryDef(term, nodeEle){
 }
 
 function getDictLink(quer){
-  var linkText = "<a href=\"http://www.dictionary.com/browse/" + quer + "?s=t\">";
+  var linkText = "<a target=\"_blank\" href=\"http://www.dictionary.com/browse/" + quer + "?s=t\">";
   linkText += "Dictionary.com entry for " + decodeURIComponent(quer) + "</a>";
   return linkText;
 }
@@ -236,18 +266,9 @@ function getWikipediaSummary(term, callback){
     if(response.query.pages[pageid].extract == ""){
       callback("");
       return;
-/*    try{
-      if("missing" in response.query){
-        document.getElementById("wikipedia-li").remove();
-        return;
-      }
-      var pageid = Object.keys(response.query.pages)[0];
-      if(response.query.pages[pageid].extract == ""){
-          document.getElementById("wikipedia-li").remove();
-        return;
-      }
-    } catch(err) {
-      document.getElementById("wikipedia-li").remove();*/
+    }else if(response.query.pages[pageid].extract.indexOf("may refer to:")){
+      callback("");
+      return;
     }
     callback(response.query.pages[pageid].extract);
     return;
@@ -282,9 +303,9 @@ function toTitleCase(str)
 
 function listenclick(){
   console.log("loaded dom");
-    var sp = document.getElementById('panelright');
     // onClick's logic below:
     document.body.addEventListener('click', function(event) {
+      var sp = document.getElementById('panelright');
       console.log('clicked');
         if (sp.style.display == 'none')
           return;
@@ -297,7 +318,7 @@ function listenclick(){
             clearQuery();
             endQuery();
           }
-          while(t.parentNode != document.body){
+          while(t != document.body){
             if(t === sp)
             {
               out = false;
@@ -332,11 +353,44 @@ function toTable(input){
   var rows = input.split("\n");
   var cols = {};
   for(var i = 0; i < rows.length; i++){
-    cols[i] = rows[i].split("|");
+    cols[i] = rows[i].split(" |");
   }
   if(rows.length == 1 && cols[0].length == 1)
-    return input;
-  var toReturn = "<table>";
+    return "<p class=\"value\">" + input + "</p>";
+  if(cols[rows.length-1][cols[rows.length-1].length-1].lastIndexOf("(") != -1){
+  cols[rows.length-1][cols[rows.length-1].length-1] =
+    cols[rows.length-1][cols[rows.length-1].length-1].substring(0, cols[rows.length-1][cols[rows.length-1].length-1].lastIndexOf("(") - 1);
+  }
+  var toReturn = "<table class=\"value\">";
+  if(rows.length == 1){
+    toReturn +="<tr>";
+    for(var i = 0; i < cols[0].length; i++){
+      toReturn += "<td>" + cols[0][i] + "</td>";
+      if(((i+1) % 4 == 0) && ((i+1) < cols[0].length)){
+        toReturn += "</tr><tr>"
+      }
+    }
+    toReturn +="</tr></table>"
+    return toReturn;
+  }
+var flag = true;
+for(var i = 1; i < rows.length; i++){
+  if(cols[i].length != cols[0].length)
+    flag = false;
+}
+if(!flag){
+  toReturn = "<table class=\"sidebar-multitable value\">";
+  for(var i = 0; i < rows.length; i++){
+    toReturn += "<tr><td>" + cols[i][0] + "</td><td>";
+    for(var j = 1; j < cols[i].length - 1; j++){
+      toReturn += cols[i][j] + ", ";
+    }
+    toReturn += cols[i][cols[i].length - 1] + "</td></tr>"
+  }
+  toReturn += "</table>";
+  return toReturn;
+}
+
   for(var i = 0; i < rows.length; i++){
     toReturn += "<tr>";
     for(var j = 0; j < cols[i].length; j++){
