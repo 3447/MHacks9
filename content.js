@@ -82,7 +82,25 @@ function parseResponse(respond, quer){
   var response = JSON.parse(respond);
   console.log(response);
   if (!response || !response["queryresult"]["success"] || response["queryresult"]["error"] ){
-    console.log('Invalid search to Wolfram');
+    var ul = document.getElementById("descrips");
+    var li = document.createElement("li");
+    getWikipediaSummary(quer, function(htmlstr)  {
+      document.getElementById("loading-spinner").remove();
+      if (htmlstr)
+      {
+        console.log("wiki response");
+        console.log(htmlstr);
+        li.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + htmlstr + "</p>";
+        li.setAttribute("id", "wikipedia-li");
+        ul.appendChild(li);
+      }
+      else
+      {
+        console.log("Nothing found");
+        li.innerHTML = "<p>We apologize, but we could not find anything to match your search.</p>";
+        ul.appendChild(li);
+      }
+    });
     return;
   }
   var importantTitle = {"input interpretation":null, "definition":null, "definitions":null, "synonym":null, "synonyms":null, "antonym":null, "antonyms":null,
@@ -105,6 +123,12 @@ function parseResponse(respond, quer){
     }
     else if(lowercase === "image"){
       importantTitle[lowercase] = pods[i].subpods[0].img.src;
+    }
+    else if(lowercase === "unit conversions"){
+      importantTitle[lowercase] = "";
+      for(var j = 0; j < pods[i].numsubpods; j++){
+        importantTitle[lowercase] += pods[i].subpods[j].plaintext + "\n";
+      }
     }
     else if(lowercase in importantTitle){
       importantTitle[lowercase] = pods[i].subpods[0].plaintext;
@@ -180,8 +204,8 @@ function parseResponse(respond, quer){
       }
       else
       {
-        console.log("going dict");
-        getDictionaryDef(quer, li, function(){});
+        console.log("Nothing found");
+        li.innerHTML = "<p>We apologize, but we could not find anything to match your search.</p>";
       }
     });
   }
