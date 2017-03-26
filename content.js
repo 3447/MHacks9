@@ -85,6 +85,10 @@ function parseResponse(respond, quer){
     var li = document.createElement("li");
     getWikipediaSummary(quer, function(htmlstr)  {
       document.getElementById("loading-spinner").remove();
+      var title = document.createElement("li");
+      title.id="topheading";
+      title.innerHTML = "<p>" + quer + "</p>";
+      ul.appendChild(title);
       if (htmlstr)
       {
         console.log("wiki response");
@@ -95,9 +99,17 @@ function parseResponse(respond, quer){
       }
       else
       {
-        console.log("Nothing found");
-        li.innerHTML = "<p>We apologize, but we could not find anything to match your search.</p>";
-        ul.appendChild(li);
+        console.log("To dictionary");
+        getDictionaryDef(quer, function(arraystring){
+          if(arraystring){
+            li.innerHTML = toTable(arraystring);
+            ul.appendChild(li);
+          }
+          else{
+            li.innerHTML = "<p>We apologize, but we could not find anything to match your search.</p>";
+            ul.appendChild(li);
+          }
+        });
       }
     });
     return;
@@ -113,11 +125,7 @@ function parseResponse(respond, quer){
   console.log(pods);
   for(i = 0; i < pods.length; i++) {
     lowercase = pods[i].title.toLowerCase();
-    if(lowercase === "input interpretation")
-    {
-      importantTitle[lowercase] = pods[i].subpods[0].plaintext;
-    }
-    else if(lowercase === "wikipedia summary"){
+    if(lowercase === "wikipedia summary"){
       importantTitle[lowercase] = true;
     }
     else if(lowercase === "image"){
@@ -207,8 +215,17 @@ function parseResponse(respond, quer){
       }
       else
       {
-        console.log("Nothing found");
-        li.innerHTML = "<p>We apologize, but we could not find anything to match your search.</p>";
+        console.log("To dictionary");
+        getDictionaryDef(quer, function(arraystring){
+          if(arraystring){
+            li.innerHTML = toTable(arraystring);
+            ul.appendChild(li);
+          }
+          else{
+            li.innerHTML = "<p>We apologize, but we could not find anything to match your search.</p>";
+            ul.appendChild(li);
+          }
+        });
       }
     });
   }
@@ -231,18 +248,37 @@ function parseResponse(respond, quer){
   }
 }
 
-function getDictionaryDef(term, nodeEle){
-  var url = "https://www.dictionaryapi.com/api/v1/references/collegiate/xml/" + encodeURIComponent(term) + "?key=" + encodeURIComponent(dictID);
+function getDictionaryDef(term, callback){
+  var url = "https://od-api.oxforddictionaries.com/api/v1/entries/en/" + encodeURIComponent(term.toLowerCase()) + "/definitions";
   var x = new XMLHttpRequest();
   x.onload = function(){
-  //  callback("<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + response.query.pages[pageid].extract + "</p>");
-    nodeEle.appendChild(document.createTextNode(x.response));
+    //  callback("<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + response.query.pages[pageid].extract + "</p>");
+    var response = JSON.parse(x.response);
+    toReturn = "";
+    var counter = 1;
+    try{
+      for(var o = 0; o < response.results[0].lexicalEntries.length; o++){
+        var entries = response.results[0].lexicalEntries[o].entries;
+        for(var i = 0; i < entries.length; i++){
+          for(var j = 0; j < entries[i].senses.length; j++){
+            for(var k = 0; k < entries[i].senses[j].definitions.length; k++){
+              toReturn += (counter++) + " | " + response.results[0].lexicalEntries[o].lexicalCategory + " | " + entries[i].senses[j].definitions[k] + "\n";
+            }
+          }
+        }
+      }
+    } catch (err){
+      callback("");
+    }
+    callback(toReturn);
   }
   x.onerror = function(err) {
     console.log(err);
   };
   x.open('GET', url, true);
-  x.setRequestHeader( 'Api-User-Agent', 'MHacks9 Research Agent/1.0; github.com/3447/MHacks9' );
+  x.setRequestHeader( 'app_id', oid );
+  x.setRequestHeader( 'app_key', okey );
+  x.setRequestHeader( 'accept', 'application/json');
   x.send();
 }
 
