@@ -66,7 +66,6 @@ function startQuery(quer){
   var searchUrl = 'https://api.wolframalpha.com/v2/query' + '?appid=' + encodeURIComponent(appID) +
   '&input=' + quer + '&format=image,plaintext&output=JSON';
   var x = new XMLHttpRequest();
-  //  x.responseType = 'json';
   x.onload = function(){
     parseResponse(x.response, quer);
   }
@@ -251,8 +250,14 @@ function parseResponse(respond, quer){
 function getDictionaryDef(term, callback){
   var url = "https://od-api.oxforddictionaries.com/api/v1/entries/en/" + encodeURIComponent(term.toLowerCase()) + "/definitions";
   var x = new XMLHttpRequest();
-  x.onload = function(){
-    //  callback("<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + response.query.pages[pageid].extract + "</p>");
+  x.onreadystatechange = function(){
+    if(x.readyState != 4){
+      return;
+    }
+    if(x.status == 404 || x.status == 403){
+      callback("");
+      return;
+    }
     var response = JSON.parse(x.response);
     toReturn = "";
     var counter = 1;
@@ -302,9 +307,9 @@ function getWikipediaSummary(term, callback){
     if(response.query.pages[pageid].extract == ""){
       callback("");
       return;
-    }else if(response.query.pages[pageid].extract.indexOf("may refer to:")){
-      callback("");
-      return;
+//    }else if(response.query.pages[pageid].extract.indexOf("may refer to:")){
+//      callback("");
+//      return;
     }
     callback(response.query.pages[pageid].extract);
     return;
