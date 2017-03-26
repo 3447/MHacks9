@@ -1,14 +1,22 @@
 
-  #panelright
-  {
-    height: 100%;
-    width: 30%;
-    right: 0px;
-    top: 0px;
-    position: fixed;
-    z-index: 1000;
-    background-color: #f8f9fa;
-    border-style: solid;
-    border-width: 1px;
-    color: black;
-  }
+#panelright
+{
+  height: 100%;
+  width: 30%;
+  right: 0px;
+  top: 0px;
+  position: fixed;
+  z-index: 1000;
+  background-color: #f8f9fa;
+  border-style: solid;
+  border-width: 1px;
+  color: black;
+}
+
+#topheading
+{
+  text-decoration: underline;
+  text-align: center;
+  font-size: 200%;
+  font-weight: bold;
+}
