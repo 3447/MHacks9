@@ -1,6 +1,6 @@
 
 function getDictLink(quer){
-  var linkText = "<a href=\"https://www.dictionary.com/browse/" + quer + "?s=t\">";
+  var linkText = "<a href=\"http://www.dictionary.com/browse/" + quer + "?s=t\">";
   linkText += "Dictionary.com entry for " + quer + "</a>";
   return linkText;
 }
@@ -61,7 +61,7 @@ function parseResponse(respond, quer){
     console.log('Invalid search to Wolfram');
     return;
   }
-  var importantTitle = {"definition":null, "definitions":null, "synonym":null, "synonyms":null, "antonym":null, "antonyms":null,
+  var importantTitle = {"input interpretation":null, "definition":null, "definitions":null, "synonym":null, "synonyms":null, "antonym":null, "antonyms":null,
                         "pronounciation":null, "image":null, "basic movie information":null, "cast":null, "wikipedia summary":null,
                         "basic series information":null, "latest trade":null, "chemical names and formulas":null,
                         "administrative regions": null, "current weather":null, "unit conversions":null, "basic information":null,
@@ -70,12 +70,15 @@ function parseResponse(respond, quer){
 
   var pods = response["queryresult"]["pods"];
   console.log(pods);
-
-  for(i = 1; i < pods.length; i++) {
-    var lowercase = pods[i].title.toLowerCase();
-    if(lowercase === "wikipedia summary"){
+  for(i = 0; i < pods.length; i++) {
+    lowercase = pods[i].title.toLowerCase();
+    if(lowercase === "input interpretation")
+    {
+      importantTitle[lowercase] = pods[i].subpods[0].plaintext;
+    }
+    else if(lowercase === "wikipedia summary"){
       importantTitle[lowercase] = true;
-      getWikipediaSummary(pods[0].subpods[0].plaintext);
+      getWikipediaSummary(pods[i].subpods[0].plaintext);
     }
     else if(lowercase === "image"){
       importantTitle[lowercase] = pods[i].subpods[0].imagesource;
@@ -94,7 +97,12 @@ function parseResponse(respond, quer){
   for(var key in importantTitle){
     var li = document.createElement("li");
     if(importantTitle.hasOwnProperty(key) && importantTitle[key] !== null){
-      if(key.toLowerCase() === "wikipedia summary"){
+      if (key.toLowerCase() === "input interpretation")
+      {
+        li.innerHTML = "<p id=\"topheading\">" + importantTitle[key] + "</p>";
+        ul.appendChild(li);
+      }
+      else if(key.toLowerCase() === "wikipedia summary"){
         li.setAttribute("id", "wikipedia-li");
         li.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p><img alt=\"loading\" src=\"" + window.url + "\" />&nbsp&nbspLoading</p>";
         ul.appendChild(li);
@@ -110,8 +118,10 @@ function parseResponse(respond, quer){
         ul.appendChild(li);
         continue;
       }
+      else{
       li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + importantTitle[key];
       ul.appendChild(li);
+      }
     }
   }
   for(var key in importantIDs){
