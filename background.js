@@ -6,7 +6,7 @@ function clickHandler(info, tab){
       // chrome.tabs.executeScript(null,
       //   {code: "var quer = ", text, ";"},
       // function() {chrome.tabs.executeScript(null,file:"content.js")});
-      chrome.tabs.sendMessage(tab.id, {message: "open_sidebar", content: text});
+      chrome.tabs.sendMessage(tab.id, {message: "open_sidebar", content: text, url: chrome.extension.getURL("images/loading.gif")});
     }
   }
 }
@@ -22,7 +22,7 @@ function keyHandler(command, tab){
         if (selection[0].length > 0)
         {
           console.log("highlighted");
-          chrome.tabs.sendMessage(tab.id, {message: "open_sidebar", content: selection[0]});
+          chrome.tabs.sendMessage(tab.id, {message: "open_sidebar", content: selection[0], url: chrome.extension.getURL("images/loading.gif")});
         }
         else {
           console.log("empty");
