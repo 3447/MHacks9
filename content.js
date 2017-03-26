@@ -1,12 +1,13 @@
 
 function getDictLink(quer){
-  var linkText = "<a href=\"http://www.dictionary.com/browse/" + quer + "?s=t\">";
-  linkText += "Dictionary.com entry for " + quer + "</a";
+  var linkText = "<a href=\"https://www.dictionary.com/browse/" + quer + "?s=t\">";
+  linkText += "Dictionary.com entry for " + quer + "</a>";
   return linkText;
 }
 
 var open = false;
 var listen = false;
+var url = "";
 function showPane()
 {
   if (document.getElementById('panelright'))
@@ -16,9 +17,15 @@ function showPane()
   }
   else
   {
-  var div = document.createElement('div');
-  div.id = 'panelright';
+    var div = document.createElement('div');
+    div.id = 'panelright';
   }
+
+  var loading = document.createElement('div');
+  loading.id = "loading-spinner";
+  loading.innerHTML = "<p><img alt=\"Loading, Please Wait\" src=\"" + window.url + "\" /></p><h3>Loading...Please Wait</h3>";
+  div.appendChild(loading);
+
   var ul = document.createElement('ul');
   ul.id = 'descrips';
   ul.listStyleType = "none";
@@ -59,13 +66,13 @@ function parseResponse(respond, quer){
                         "basic series information":null, "latest trade":null, "chemical names and formulas":null,
                         "administrative regions": null, "current weather":null, "unit conversions":null, "basic information":null,
                         "notable facts":null, "location and owner":null, "basic properties":null};
-  var importantIDs = {"observancedate (country)":null, "notableeventfordate":null};
+  var importantIDs = {"definition:worddata":null, "observancedate (country)":null, "notableeventfordate":null};
 
   var pods = response["queryresult"]["pods"];
   console.log(pods);
 
   for(i = 1; i < pods.length; i++) {
-    lowercase = pods[i].title.toLowerCase();
+    var lowercase = pods[i].title.toLowerCase();
     if(lowercase === "wikipedia summary"){
       importantTitle[lowercase] = true;
       getWikipediaSummary(pods[0].subpods[0].plaintext);
@@ -83,12 +90,13 @@ function parseResponse(respond, quer){
 
   var ul = document.getElementById("descrips");
 
+  document.getElementById("loading-spinner").remove();
   for(var key in importantTitle){
     var li = document.createElement("li");
     if(importantTitle.hasOwnProperty(key) && importantTitle[key] !== null){
       if(key.toLowerCase() === "wikipedia summary"){
         li.setAttribute("id", "wikipedia-li");
-        li.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p><img alt=\"loading\" src=\"images/loading.gif\" />&nbsp&nbspLoading</p>";
+        li.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p><img alt=\"loading\" src=\"" + window.url + "\" />&nbsp&nbspLoading</p>";
         ul.appendChild(li);
         continue;
       }
@@ -109,8 +117,26 @@ function parseResponse(respond, quer){
   for(var key in importantIDs){
     if(importantIDs.hasOwnProperty(key) && importantIDs[key] !== null){
       var li = document.createElement("li");
-      li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + importantIDs[key];
+      li.innerHTML = /*"<p class=\"key\"><b>" + toTitleCase(key) + "</b></p>*/"<p class=\"value\">" + importantIDs[key];
       ul.appendChild(li);
+    }
+  }
+
+  if("assumptions" in response["queryresult"]){
+    var template = "Assuming \"" + response.queryresult.assumptions.word + "\" is " + response.queryresult.assumptions.values[0].desc + ". Us as ";
+    template += "<a href='#' id=\"chrome-extension-sidebar-alternates-1\" new-script=\"" + response.queryresult.assumptions.values[1].input + "\">" +
+      response.queryresult.assumptions.values[1].desc + "</a> ";
+    for(var k = 2; k < response.queryresult.assumptions.count; k++){
+      template += "or <a href='#' id=\"chrome-extension-sidebar-alternates-" + k + "\" new-script=\"" + response.queryresult.assumptions.values[k].input + "\">" +
+        response.queryresult.assumptions.values[k].desc + "</a> ";
+    }
+    template += "instead.";
+    var alternates = document.createElement("div");
+    alternates.innerHTML = template;
+    alternates.id = "chrome-extension-sidebar-alternates";
+    document.getElementById("descrips").appendChild(alternates);
+    for(var k = 1; k < response.queryresult.assumptions.count; k++){
+      document.getElementById("chrome-extension-sidebar-alternates-"+ k).addEventListener("click", reload, false);
     }
   }
 }
@@ -167,6 +193,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     console.log("Selection event. Looking up: " + request.content);
     showPane();
     startQuery(request.content);
+    window.url = request.url;
     return true;
   }
   else if(request.message === "close_sidebar" && open == true){
@@ -178,6 +205,12 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   else if(request.message === "open_sidebar" && open == true){
     console.log("Selection. Clearing then looking up: " + request.content);
     clearQuery();
+
+    var loading = document.createElement('div');
+    loading.id = "loading-spinner";
+    loading.innerHTML = "<p><img alt=\"Loading, Please Wait\" src=\"" + window.url + "\" /></p><h3>Loading...Please Wait</h3>";
+    document.getElementById("descrips").appendChild(loading);
+
     startQuery(request.content);
     return true;
   }});
@@ -199,4 +232,18 @@ function listenclick(){
             }
         }
     });
+}
+
+function reload(zEvent){
+  var input = this.getAttribute("new-script");
+  var base = input.substring(3, input.indexOf("-_*"));
+  var modifier = input.substring(input.indexOf("-_*")+3, input.length - 1);
+
+  clearQuery();
+  var loading = document.createElement('div');
+  loading.id = "loading-spinner";
+  loading.innerHTML = "<p><img alt=\"Loading, Please Wait\" src=\"" + window.url + "\" /></p><h3>Loading...Please Wait</h3>";
+  document.getElementById("descrips").appendChild(loading);
+
+  startQuery(base + "%20" + modifier);
 }

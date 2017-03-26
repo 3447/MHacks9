@@ -26,6 +26,8 @@
     }
   },
 
+  "web_accessible_resources": ["images/loading.gif"],
+
   "icons": {
     "16": "images/icon16x16.png",
     "32": "images/icon32x32.png",
