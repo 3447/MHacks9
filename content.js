@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 function getDictLink(quer){
   var linkText = "<a href=\"http://www.dictionary.com/browse/" + quer + "?s=t\">";
   linkText += "Dictionary.com entry for " + decodeURIComponent(quer) + "</a>";
@@ -79,10 +77,6 @@ function parseResponse(respond, quer){
     }
     else if(lowercase === "wikipedia summary"){
       importantTitle[lowercase] = true;
-<<<<<<< HEAD
-=======
-      getWikipediaSummary(pods[i].subpods[0].plaintext);
->>>>>>> f18280330dce3816b85971d8309dd4b5e1e07919
     }
     else if(lowercase === "image"){
       importantTitle[lowercase] = pods[i].subpods[0].img.src;
@@ -101,8 +95,12 @@ function parseResponse(respond, quer){
   for(var key in importantTitle){
     var li = document.createElement("li");
     if(importantTitle.hasOwnProperty(key) && importantTitle[key] !== null){
-<<<<<<< HEAD
-      if(key.toLowerCase() === "wikipedia summary"){
+      if (key.toLowerCase() === "input interpretation")
+      {
+        li.innerHTML = "<p id=\"topheading\">" + importantTitle[key] + "</p>";
+        ul.appendChild(li);
+      }
+      else if(key.toLowerCase() === "wikipedia summary"){
         getWikipediaSummary(pods[0].subpods[0].plaintext, li, function (htmlstr) {
           if (htmlstr.length > 0)
           {
@@ -116,18 +114,6 @@ function parseResponse(respond, quer){
             li.remove();
           }
         });
-=======
-      if (key.toLowerCase() === "input interpretation")
-      {
-        li.innerHTML = "<p id=\"topheading\">" + importantTitle[key] + "</p>";
-        ul.appendChild(li);
-      }
-      else if(key.toLowerCase() === "wikipedia summary"){
-        li.setAttribute("id", "wikipedia-li");
-        li.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p><img alt=\"loading\" src=\"" + window.url + "\" />&nbsp&nbspLoading</p>";
-        ul.appendChild(li);
-        continue;
->>>>>>> f18280330dce3816b85971d8309dd4b5e1e07919
       }
       else if(key.toLowerCase() === "image"){
         li.innerHTML = "<p class=\"key\"><b>Image</b></p><p><img class=\"sidebar-image\" src=\"" + importantTitle[key] + "\" /></p>";
@@ -135,16 +121,12 @@ function parseResponse(respond, quer){
         continue;
       }
       else if(key.toLowerCase() == "definition" || key.toLowerCase() == "definitions"){
-        li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + importantTitle[key] + "</p><p>" + getDictLink(quer) + "</p>";
+        li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + toTable(importantTitle[key]) + "</p><p>" + getDictLink(quer) + "</p>";
         ul.appendChild(li);
         continue;
       }
-<<<<<<< HEAD
-      else {
-=======
       else{
->>>>>>> f18280330dce3816b85971d8309dd4b5e1e07919
-      li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + importantTitle[key];
+      li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + toTable(importantTitle[key]);
       ul.appendChild(li);
       }
     }
@@ -152,11 +134,10 @@ function parseResponse(respond, quer){
   for(var key in importantIDs){
     if(importantIDs.hasOwnProperty(key) && importantIDs[key] !== null){
       var li = document.createElement("li");
-      li.innerHTML = /*"<p class=\"key\"><b>" + toTitleCase(key) + "</b></p>*/"<p class=\"value\">" + importantIDs[key];
+      li.innerHTML = /*"<p class=\"key\"><b>" + toTitleCase(key) + "</b></p>*/"<p class=\"value\">" + importantIDs[key] + "</p>";
       ul.appendChild(li);
     }
   }
-<<<<<<< HEAD
   if (ul.childNodes.length < 2)
   {
     var li = document.createElement("li");
@@ -175,9 +156,7 @@ function parseResponse(respond, quer){
         getDictionaryDef(quer, li, function(){});
       }
     });
-=======
-
-  if("assumptions" in response["queryresult"]){
+  else if("assumptions" in response["queryresult"]){
     var template = "Assuming \"" + response.queryresult.assumptions.word + "\" is " + response.queryresult.assumptions.values[0].desc + ". Use as ";
     template += "<a href='#' id=\"chrome-extension-sidebar-alternates-1\" new-script=\"" + response.queryresult.assumptions.values[1].input + "\">" +
       response.queryresult.assumptions.values[1].desc + "</a> ";
@@ -193,7 +172,6 @@ function parseResponse(respond, quer){
     for(var k = 1; k < response.queryresult.assumptions.count; k++){
       document.getElementById("chrome-extension-sidebar-alternates-"+ k).addEventListener("click", reload, false);
     }
->>>>>>> f18280330dce3816b85971d8309dd4b5e1e07919
   }
 }
 
@@ -217,7 +195,6 @@ function getWikipediaSummary(term, callback){
   var x = new XMLHttpRequest();
   x.onload = function(){
     var response = JSON.parse(x.response);
-<<<<<<< HEAD
     console.log(response);
     if("missing" in response.query){
       callback("");
@@ -227,20 +204,18 @@ function getWikipediaSummary(term, callback){
     if(response.query.pages[pageid].extract == ""){
       callback("");
       return;
-=======
-    try{
+/*    try{
       if("missing" in response.query){
         document.getElementById("wikipedia-li").remove();
         return;
       }
       var pageid = Object.keys(response.query.pages)[0];
       if(response.query.pages[pageid].extract == ""){
-        document.getElementById("wikipedia-li").remove();
+          document.getElementById("wikipedia-li").remove();
         return;
       }
     } catch(err) {
-      document.getElementById("wikipedia-li").remove();
->>>>>>> f18280330dce3816b85971d8309dd4b5e1e07919
+      document.getElementById("wikipedia-li").remove();*/
     }
     callback(response.query.pages[pageid].extract);
     return;
@@ -430,10 +405,6 @@ function parseResponse(respond, quer){
     }
     else if(lowercase === "wikipedia summary"){
       importantTitle[lowercase] = true;
-<<<<<<< HEAD
-=======
-      getWikipediaSummary(pods[i].subpods[0].plaintext);
->>>>>>> f18280330dce3816b85971d8309dd4b5e1e07919
     }
     else if(lowercase === "image"){
       importantTitle[lowercase] = pods[i].subpods[0].img.src;
@@ -452,7 +423,6 @@ function parseResponse(respond, quer){
   for(var key in importantTitle){
     var li = document.createElement("li");
     if(importantTitle.hasOwnProperty(key) && importantTitle[key] !== null){
-<<<<<<< HEAD
       if(key.toLowerCase() === "wikipedia summary"){
         getWikipediaSummary(pods[0].subpods[0].plaintext, li, function (htmlstr) {
           if (htmlstr.length > 0)
@@ -467,18 +437,11 @@ function parseResponse(respond, quer){
             li.remove();
           }
         });
-=======
-      if (key.toLowerCase() === "input interpretation")
+      else if (key.toLowerCase() === "input interpretation")
       {
         li.innerHTML = "<p id=\"topheading\">" + importantTitle[key] + "</p>";
         ul.appendChild(li);
       }
-      else if(key.toLowerCase() === "wikipedia summary"){
-        li.setAttribute("id", "wikipedia-li");
-        li.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p><img alt=\"loading\" src=\"" + window.url + "\" />&nbsp&nbspLoading</p>";
-        ul.appendChild(li);
-        continue;
->>>>>>> f18280330dce3816b85971d8309dd4b5e1e07919
       }
       else if(key.toLowerCase() === "image"){
         li.innerHTML = "<p class=\"key\"><b>Image</b></p><p><img class=\"sidebar-image\" src=\"" + importantTitle[key] + "\" /></p>";
@@ -490,11 +453,7 @@ function parseResponse(respond, quer){
         ul.appendChild(li);
         continue;
       }
-<<<<<<< HEAD
       else {
-=======
-      else{
->>>>>>> f18280330dce3816b85971d8309dd4b5e1e07919
       li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + importantTitle[key];
       ul.appendChild(li);
       }
@@ -507,7 +466,6 @@ function parseResponse(respond, quer){
       ul.appendChild(li);
     }
   }
-<<<<<<< HEAD
   if (ul.childNodes.length < 2)
   {
     var li = document.createElement("li");
@@ -526,9 +484,7 @@ function parseResponse(respond, quer){
         getDictionaryDef(quer, li, function(){});
       }
     });
-=======
-
-  if("assumptions" in response["queryresult"]){
+  else if("assumptions" in response["queryresult"]){
     var template = "Assuming \"" + response.queryresult.assumptions.word + "\" is " + response.queryresult.assumptions.values[0].desc + ". Use as ";
     template += "<a href='#' id=\"chrome-extension-sidebar-alternates-1\" new-script=\"" + response.queryresult.assumptions.values[1].input + "\">" +
       response.queryresult.assumptions.values[1].desc + "</a> ";
@@ -544,7 +500,6 @@ function parseResponse(respond, quer){
     for(var k = 1; k < response.queryresult.assumptions.count; k++){
       document.getElementById("chrome-extension-sidebar-alternates-"+ k).addEventListener("click", reload, false);
     }
->>>>>>> f18280330dce3816b85971d8309dd4b5e1e07919
   }
 }
 
@@ -568,7 +523,6 @@ function getWikipediaSummary(term, callback){
   var x = new XMLHttpRequest();
   x.onload = function(){
     var response = JSON.parse(x.response);
-<<<<<<< HEAD
     console.log(response);
     if("missing" in response.query){
       callback("");
@@ -578,20 +532,6 @@ function getWikipediaSummary(term, callback){
     if(response.query.pages[pageid].extract == ""){
       callback("");
       return;
-=======
-    try{
-      if("missing" in response.query){
-        document.getElementById("wikipedia-li").remove();
-        return;
-      }
-      var pageid = Object.keys(response.query.pages)[0];
-      if(response.query.pages[pageid].extract == ""){
-        document.getElementById("wikipedia-li").remove();
-        return;
-      }
-    } catch(err) {
-      document.getElementById("wikipedia-li").remove();
->>>>>>> f18280330dce3816b85971d8309dd4b5e1e07919
     }
     callback(response.query.pages[pageid].extract);
     return;
@@ -700,4 +640,23 @@ function reload(zEvent){
 
   startQuery(base + "%20" + modifier);
 }
->>>>>>> 56b378a15e5d43a0020c00573b105e79dde0b182
+
+function toTable(input){
+  var rows = input.split("\n");
+  var cols = {};
+  for(var i = 0; i < rows.length; i++){
+    cols[i] = rows[i].split("|");
+  }
+  if(rows.length == 1 && cols[0].length == 1)
+    return input;
+  var toReturn = "<table>";
+  for(var i = 0; i < rows.length; i++){
+    toReturn += "<tr>";
+    for(var j = 0; j < cols[i].length; j++){
+      toReturn += "<td>" + cols[i][j] + "</td>";
+    }
+    toReturn += "</tr>";
+  }
+  toReturn += "</table>";
+  return toReturn;
+}
