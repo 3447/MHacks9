@@ -1,0 +1,44 @@
+
+#panelright
+{
+  height: 100%;
+  width: 30%;
+  right: 0px;
+  top: 0px;
+  position: fixed;
+  z-index: 10000;
+  background-color: #f8f9fa;
+  border-style: solid;
+  border-width: 1px;
+  color: black;
+  list-style: none;
+}
+
+#panelright #loading-spinner{
+  text-align: center;
+  margin: 0 auto;
+  padding-top: 30px;
+}
+#panelright #loading-spinner img{
+  height: 40px;
+  width: 40px;
+  margin: 0 auto;
+}
+
+#panelright #wikipedia-li img{
+  height: 40px;
+  width: 40px;
+  margin: 0 auto;
+}
+
+#topheading
+{
+  text-decoration: underline;
+  text-align: center;
+  font-size: 200%;
+  font-weight: bold;
+}
+
+#panelright ul{
+  margin-left: 10px;
+}
