@@ -114,12 +114,12 @@ function parseResponse(respond, quer){
         continue;
       }
       else if(key.toLowerCase() == "definition" || key.toLowerCase() == "definitions"){
-        li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + importantTitle[key] + "</p><p>" + getDictLink(quer) + "</p>";
+        li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + toTable(importantTitle[key]) + "</p><p>" + getDictLink(quer) + "</p>";
         ul.appendChild(li);
         continue;
       }
       else{
-      li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + importantTitle[key];
+      li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + toTable(importantTitle[key]);
       ul.appendChild(li);
       }
     }
@@ -127,7 +127,7 @@ function parseResponse(respond, quer){
   for(var key in importantIDs){
     if(importantIDs.hasOwnProperty(key) && importantIDs[key] !== null){
       var li = document.createElement("li");
-      li.innerHTML = /*"<p class=\"key\"><b>" + toTitleCase(key) + "</b></p>*/"<p class=\"value\">" + importantIDs[key];
+      li.innerHTML = /*"<p class=\"key\"><b>" + toTitleCase(key) + "</b></p>*/"<p class=\"value\">" + importantIDs[key] + "</p>";
       ul.appendChild(li);
     }
   }
@@ -260,4 +260,24 @@ function reload(zEvent){
   document.getElementById("descrips").appendChild(loading);
 
   startQuery(base + "%20" + modifier);
+}
+
+function toTable(input){
+  var rows = input.split("\n");
+  var cols = {};
+  for(var i = 0; i < rows.length; i++){
+    cols[i] = rows[i].split("|");
+  }
+  if(rows.length == 1 && cols[0].length == 1)
+    return input;
+  var toReturn = "<table>";
+  for(var i = 0; i < rows.length; i++){
+    toReturn += "<tr>";
+    for(var j = 0; j < cols[i].length; j++){
+      toReturn += "<td>" + cols[i][j] + "</td>";
+    }
+    toReturn += "</tr>";
+  }
+  toReturn += "</table>";
+  return toReturn;
 }
