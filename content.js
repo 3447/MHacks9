@@ -81,7 +81,6 @@ function parseResponse(respond, quer){
     lowercase = pods[i].title.toLowerCase();
     if(lowercase === "wikipedia summary"){
       importantTitle[lowercase] = true;
-      getWikipediaSummary(pods[0].subpods[0].plaintext);
     }
     else if(lowercase === "image"){
       importantTitle[lowercase] = pods[i].subpods[0].imagesource;
@@ -100,10 +99,19 @@ function parseResponse(respond, quer){
     var li = document.createElement("li");
     if(importantTitle.hasOwnProperty(key) && importantTitle[key] !== null){
       if(key.toLowerCase() === "wikipedia summary"){
-        li.setAttribute("id", "wikipedia-li");
-        li.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p><img alt=\"loading\" src=\"images/loading.gif\" />&nbsp&nbspLoading</p>";
-        ul.appendChild(li);
-        continue;
+        getWikipediaSummary(pods[0].subpods[0].plaintext, li, function (htmlstr) {
+          if (htmlstr.length > 0)
+          {
+            li.innerHTML = htmlstr;
+            li.setAttribute("id", "wikipedia-li");
+            ul.appendChild(li);
+          }
+          else
+          {
+          //  li.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p><img alt=\"loading\" src=\"images/loading.gif\" />&nbsp&nbspLoading</p>";
+            li.remove();
+          }
+        });
       }
       else if(key.toLowerCase() === "image"){
         li.innerHTML = "<p class=\"key\"><b>Image</b></p><p><img class=\"sidebar-image\" src=\"" + importantTitle[key] + "\" /></p>";
@@ -115,8 +123,10 @@ function parseResponse(respond, quer){
         ul.appendChild(li);
         continue;
       }
+      else {
       li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + importantTitle[key];
       ul.appendChild(li);
+      }
     }
   }
   for(var key in importantIDs){
@@ -126,24 +136,59 @@ function parseResponse(respond, quer){
       ul.appendChild(li);
     }
   }
+  if (ul.childNodes.length < 2)
+  {
+    var li = document.createElement("li");
+    getWikipediaSummary(quer, function(htmlstr)  {
+      if (htmlstr)
+      {
+        console.log("wiki response");
+        console.log(htmlstr);
+        li.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + htmlstr + "</p>";
+        li.setAttribute("id", "wikipedia-li");
+        ul.appendChild(li);
+      }
+      else
+      {
+        console.log("going dict");
+        getDictionaryDef(quer, li, function(){});
+      }
+    });
+  }
 }
 
-function getWikipediaSummary(term){
+function getDictionaryDef(term, nodeEle){
+  var url = "https://www.dictionaryapi.com/api/v1/references/collegiate/xml/" + encodeURIComponent(term) + "?key=" + encodeURIComponent(dictID);
+  var x = new XMLHttpRequest();
+  x.onload = function(){
+  //  callback("<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + response.query.pages[pageid].extract + "</p>");
+    nodeEle.appendChild(document.createTextNode(x.response));
+  }
+  x.onerror = function(err) {
+    console.log(err);
+  };
+  x.open('GET', url, true);
+  x.setRequestHeader( 'Api-User-Agent', 'MHacks9 Research Agent/1.0; github.com/3447/MHacks9' );
+  x.send();
+}
+
+function getWikipediaSummary(term, callback){
   var url = "https://en.wikipedia.org/w/api.php?format=json&action=query&exsentences=3&prop=extracts&exintro=&explaintext=&titles=" + encodeURIComponent(term);
   var x = new XMLHttpRequest();
-  //  x.responseType = 'json';
   x.onload = function(){
     var response = JSON.parse(x.response);
+    console.log(response);
     if("missing" in response.query){
-      document.getElementById("wikipedia-li").remove();
+      callback("");
       return;
     }
     var pageid = Object.keys(response.query.pages)[0];
     if(response.query.pages[pageid].extract == ""){
-      document.getElementById("wikipedia-li").remove();
+      callback("");
       return;
     }
-    document.getElementById("wikipedia-li").innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + response.query.pages[pageid].extract + "</p>"
+    callback(response.query.pages[pageid].extract);
+    return;
   }
   x.onerror = function(err) {
     console.log(err);
@@ -204,12 +249,27 @@ function listenclick(){
         if (sp.style.display == 'none')
           return;
         else {
-          if(!(event.target === sp) && !(event.target.parentNode === sp)
-            && !(event.target.parentNode.parentNode === sp))
+          var t = event.target;
+          console.log(event.target);
+          var out = true;
+          if( t === document.body )
+          {
+            clearQuery();
+            endQuery();
+          }
+          while(t.parentNode != document.body){
+            if(t === sp)
             {
-              clearQuery();
-              endQuery();
+              out = false;
+              break;
             }
+            t = t.parentNode;
+          }
+          if(out)
+          {
+            clearQuery();
+            endQuery();
+          }
         }
     });
 }
