@@ -86,10 +86,10 @@ function parseResponse(respond, quer){
     return;
   }
   var importantTitle = {"input interpretation":null, "definition":null, "definitions":null, "synonym":null, "synonyms":null, "antonym":null, "antonyms":null,
-                        "pronunciation":null, "image":null, "basic movie information":null, "cast":null, "wikipedia summary":null,
-                        "basic series information":null, "latest trade":null, "chemical names and formulas":null,
+                        "pronunciation":null, "basic movie information":null, "basic series information":null, "cast":null,
+                        "wikipedia summary":null, "latest trade":null, "chemical names and formulas":null,
                         "administrative regions": null, "current weather":null, "unit conversions":null, "basic information":null,
-                        "notable facts":null, "location and owner":null, "basic properties":null};
+                        "notable facts":null, "location and owner":null, "basic properties":null, "image":null};
   var importantIDs = {"definition:worddata":null, "observancedate (country)":null, "notableeventfordate":null};
 
   var pods = response["queryresult"]["pods"];
@@ -131,27 +131,30 @@ function parseResponse(respond, quer){
           {
             console.log("wiki response");
             console.log(htmlstr);
-            li.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + htmlstr + "</p>";
-            li.setAttribute("id", "wikipedia-li");
-            ul.appendChild(li);
-          }
-          else {
-            li.remove();
+            var element = document.createElement("li");
+            element.innerHTML = "<p class=\"key\"><b>Wikipedia Summary</b></p><p>" + htmlstr + "</p>";
+            element.setAttribute("id", "wikipedia-li");
+            ul.appendChild(element);
           }
         });
       }
       else if(key.toLowerCase() === "image"){
-        li.innerHTML = "<p class=\"key\"><b>Image</b></p><p><img class=\"sidebar-image\" src=\"" + importantTitle[key] + "\" /></p>";
+        li.innerHTML = "<p><img class=\"sidebar-image\" src=\"" + importantTitle[key] + "\" /></p>";
         ul.appendChild(li);
         continue;
       }
       else if(key.toLowerCase() == "definition" || key.toLowerCase() == "definitions"){
-        li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + toTable(importantTitle[key]) + "</p><p>" + getDictLink(quer) + "</p>";
+        li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p>" + toTable(importantTitle[key]) + "<p>" + getDictLink(quer) + "</p>";
         ul.appendChild(li);
         continue;
       }
+      else if(key.toLowerCase() == "pronunciation"){
+        var engOnly = importantTitle[key].substring(0, importantTitle[key].lastIndexOf("(") - 1);
+        li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + engOnly + "</p>";
+        ul.appendChild(li);
+      }
       else{
-      li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p><p class=\"value\">" + toTable(importantTitle[key]);
+      li.innerHTML = "<p class=\"key\"><b>" + toTitleCase(key) + "</b></p>" + toTable(importantTitle[key]);
       ul.appendChild(li);
       }
     }
@@ -320,13 +323,15 @@ function toTable(input){
   var rows = input.split("\n");
   var cols = {};
   for(var i = 0; i < rows.length; i++){
-    cols[i] = rows[i].split("|");
+    cols[i] = rows[i].split(" |");
   }
   if(rows.length == 1 && cols[0].length == 1)
-    return input;
+    return "<p class=\"value\">" + input + "</p>";
+  if(cols[rows.length-1][cols[rows.length-1].length-1].lastIndexOf("(") != -1){
   cols[rows.length-1][cols[rows.length-1].length-1] =
     cols[rows.length-1][cols[rows.length-1].length-1].substring(0, cols[rows.length-1][cols[rows.length-1].length-1].lastIndexOf("(") - 1);
-  var toReturn = "<table>";
+  }
+  var toReturn = "<table class=\"value\">";
   if(rows.length == 1){
     toReturn +="<tr>";
     for(var i = 0; i < cols[0].length; i++){
@@ -338,6 +343,24 @@ function toTable(input){
     toReturn +="</tr></table>"
     return toReturn;
   }
+var flag = true;
+for(var i = 1; i < rows.length; i++){
+  if(cols[i].length != cols[0].length)
+    flag = false;
+}
+if(!flag){
+  toReturn = "<table class=\"sidebar-multitable value\">";
+  for(var i = 0; i < rows.length; i++){
+    toReturn += "<tr><td>" + cols[i][0] + "</td><td>";
+    for(var j = 1; j < cols[i].length - 1; j++){
+      toReturn += cols[i][j] + ", ";
+    }
+    toReturn += cols[i][cols[i].length - 1] + "</td></tr>"
+  }
+  toReturn += "</table>";
+  return toReturn;
+}
+
   for(var i = 0; i < rows.length; i++){
     toReturn += "<tr>";
     for(var j = 0; j < cols[i].length; j++){
